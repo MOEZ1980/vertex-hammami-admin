@@ -636,13 +636,30 @@ function vertexWhatsAppRejectionUrl(b){
  ].join('\n');
  return 'https://wa.me/'+phone+'?text='+encodeURIComponent(message);
 }
+function vertexWhatsAppModificationUrl(b){
+ const phone=vertexWhatsAppNumber(b.customer_phone);
+ if(!phone)return '';
+ const name=String(b.customer_name||'').trim();
+ const greeting=name?'Ciao '+name+',':'Ciao,';
+ const message=[greeting,'','✂️ Il tuo appuntamento VERTEX HAMMAMI è stato aggiornato.','📅 Nuovo orario: '+dateRome(b.starts_at),'✂️ Servizio: '+(b.service_name||'—'),'','Se il nuovo orario ti va bene, rispondi CONFERMO.','Se preferisci un altro orario, prenota qui: https://www.vertexhammami.it/#prenota','VERTEX HAMMAMI'].join('\n');
+ return 'https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+}
+function showWhatsAppModificationLink(url){
+ const el=$('dashboardMessage');
+ el.hidden=false;el.className='notice success';
+ el.replaceChildren(document.createTextNode('✓ Modifica salvata. Per inviare il messaggio al cliente: '));
+ const link=document.createElement('a');
+ link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+ link.textContent='Apri WhatsApp';link.style.cssText='display:inline-block;margin:8px 0 0;padding:8px 12px;border:1px solid currentColor;border-radius:7px;font-weight:800;color:inherit';
+ el.append(link);
+}
 async function changeStatus(b,status){
  const label=statusLabels[status]||status;
  if(loading)return;
  if(!window.confirm('Confermi «'+label+'» per '+(b.customer_name||'Cliente')+'?\n'+appointmentRange(b.starts_at,b.ends_at)+' · '+(b.service_name||'Appuntamento')))return;
- const notifyCustomer=status==='confirmed'||status==='rejected'||status==='cancelled';
+ const notifyCustomer=status==='confirmed'||status==='rejected';
  const whatsappUrl=status==='confirmed'?vertexWhatsAppConfirmationUrl(b)
-  :(status==='rejected'||status==='cancelled')?vertexWhatsAppRejectionUrl(b):'';
+  :status==='rejected'?vertexWhatsAppRejectionUrl(b):'';
  // Apri una scheda vuota durante il clic: iOS può bloccare popup aperti dopo await.
  let whatsappTab=null;
  if(whatsappUrl){
@@ -776,12 +793,30 @@ $('editForm').addEventListener('submit',async e=>{
   const minutes=Number($('editDuration').value);
   if(!Number.isInteger(minutes)||minutes<5||minutes>240)throw new Error('Durata: da 5 a 240 minuti.');
   const ends_at=new Date(new Date(starts_at).getTime()+minutes*60000).toISOString();
+  const existing=bookings.find(b=>String(b.id)===String(editingId));
+  const customer={...(existing||{}),customer_name:$('editName').value.trim(),customer_phone:$('editPhone').value.trim(),service_name:$('editService').value.trim(),price:Number($('editPrice').value),starts_at,ends_at};
+  const whatsappUrl=existing?vertexWhatsAppModificationUrl(customer):'';
   if(!window.confirm('Salvare le modifiche a questa prenotazione?'))return;
+  // Apri la scheda nel gesto del clic; dopo il salvataggio la portiamo alla bozza WhatsApp.
+  const whatsappTab=whatsappUrl?window.open('about:blank','_blank'):null;
+  if(whatsappTab){
+   try{whatsappTab.opener=null;whatsappTab.document.title='VERTEX HAMMAMI';whatsappTab.document.body.textContent='Salvataggio modifica…';}catch(_error){}
+  }
   const ok=await scheduleAction({action:'edit',id:editingId,
-   customer_name:$('editName').value.trim(),customer_phone:$('editPhone').value.trim(),
-   service_name:$('editService').value.trim(),price:Number($('editPrice').value),
-   starts_at,ends_at},'Prenotazione modificata.');
-  if(ok)$('editDialog').close();
+   customer_name:customer.customer_name,customer_phone:customer.customer_phone,
+   service_name:customer.service_name,price:customer.price,starts_at,ends_at},'Prenotazione modificata.');
+  if(ok){
+   $('editDialog').close();
+   if(whatsappUrl&&whatsappTab&&!whatsappTab.closed){
+    try{whatsappTab.location.replace(whatsappUrl);}catch(_error){showWhatsAppModificationLink(whatsappUrl)}
+   }else if(whatsappUrl){
+    showWhatsAppModificationLink(whatsappUrl);
+   }else if(existing){
+    showNotice('Modifica salvata, ma il numero non è valido per WhatsApp.','error');
+   }
+  }else if(whatsappTab&&!whatsappTab.closed){
+   whatsappTab.close();
+  }
  }catch(err){showNotice(err.message,'error')}
 });
 $('cancelEdit').onclick=()=>$('editDialog').close();
