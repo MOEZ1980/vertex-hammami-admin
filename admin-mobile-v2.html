@@ -71,7 +71,7 @@ button{min-height:46px;}
 
 /* VERTEX split-view: Agenda calendar + compact client directory */
 #mobileTabs{position:fixed;z-index:50;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr;background:#18130e;border-top:1px solid var(--line);padding:8px max(12px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:8px}
-#mobileTabs button{border:1px solid var(--line);background:#211b14;color:var(--muted);font-size:15px;min-height:52px}
+#mobileTabs button{border:1px solid var(--line);background:#211b14;color:var(--muted);font-size:14px;line-height:1.2;min-height:46px;padding:7px 6px}
 #mobileTabs button.active{background:linear-gradient(120deg,#ffe4a9,#bd8f4c);color:#20180e}
 #calendarPanel{padding:14px}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
@@ -101,6 +101,12 @@ button{min-height:46px;}
 .barber-actions button{min-height:38px;padding:7px 10px;font-size:12px;white-space:nowrap}
 .barber-owner{font-size:12px;color:var(--muted);white-space:nowrap}
 @media(max-width:560px){#addBarberForm{grid-template-columns:1fr}#addBarberForm button{width:100%}.barber-row{grid-template-columns:1fr;gap:8px;padding:10px}.barber-actions{display:grid;grid-template-columns:1fr 1fr}.barber-actions button{width:100%;min-height:42px}.barber-owner{white-space:normal}}
+/* Keep the fixed tab bar clear of the last appointment actions, including on iPhone. */
+@media(max-width:700px){
+ main{padding-bottom:calc(170px + env(safe-area-inset-bottom))!important}
+ html{scroll-padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+ #mobileTabs{padding-top:5px;padding-bottom:calc(5px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0008}
+}
 </style>
 </head>
 <body>
