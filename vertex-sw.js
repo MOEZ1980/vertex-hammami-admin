@@ -19,15 +19,16 @@ self.addEventListener("push", (event) => {
   }
 
   const title = data.title || "VERTEX HAMMAMI";
+  const appUrl = new URL("./admin-mobile-v2.html", self.registration.scope).href;
 
   const options = {
     body: data.body || "Nuova prenotazione ricevuta!",
-    icon: "/logo.jpg",
-    badge: "/logo.jpg",
+    icon: new URL("./logo.jpg", self.registration.scope).href,
+    badge: new URL("./logo.jpg", self.registration.scope).href,
     tag: data.tag || "vertex-booking",
     renotify: true,
     data: {
-      url: data.url || "/vertex-hammami-admin/admin-mobile.html"
+      url: data.url || appUrl
     }
   };
 
@@ -40,8 +41,8 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const url = new URL(
-    event.notification.data?.url || "/vertex-hammami-admin/admin-mobile.html",
-    self.location.origin
+    event.notification.data?.url || new URL("./admin-mobile-v2.html", self.registration.scope).href,
+    self.registration.scope
   ).href;
 
   event.waitUntil(
