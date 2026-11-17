@@ -107,10 +107,40 @@ button{min-height:46px;}
  html{scroll-padding-bottom:calc(150px + env(safe-area-inset-bottom))}
  #mobileTabs{padding-top:5px;padding-bottom:calc(5px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0008}
 }
+
+/* Rifinitura mobile: cards più compatte e logo visibile */
+.brand-head{display:flex;align-items:center;gap:12px;min-width:0}.brand-head img{width:42px;height:42px;object-fit:cover;border:1px solid #c69d57;border-radius:50%;box-shadow:0 0 16px #c69d5733}.brand-head h1{margin:0 0 4px}.brand-head small{display:block}
+@media(max-width:700px){
+ header{padding:12px 14px;align-items:center;gap:8px}
+ .brand-head{gap:9px}.brand-head img{width:36px;height:36px}
+ header h1{font-size:23px;line-height:1.1}
+ header small{font-size:11px}
+ .panel{padding:13px;border-radius:12px}
+ .booking{padding:10px;gap:4px}
+ .booking-head{padding-bottom:5px}.booking-head .customer-name{font-size:17px}.booking-head .appointment-date{font-size:12px}
+ .booking p{font-size:13px;line-height:1.32}
+ .booking .service-highlight{font-size:15px;padding:6px 8px}
+ .actions{gap:7px;padding-top:5px}.actions button{min-height:42px;padding:8px 9px;font-size:13px}
+ #mobileTabs button{min-height:44px;font-size:13px}
+}
+
+/* Navigation never covers controls on desktop; action buttons wrap inside their cards. */
+.actions button{flex:1 1 180px;min-width:0;white-space:normal;overflow-wrap:anywhere}
+@media(min-width:701px){
+ #mobileTabs{position:static;left:auto;right:auto;bottom:auto;width:calc(100% - 36px);max-width:1120px;margin:18px auto 24px;padding:9px;background:#18130e;border:1px solid var(--line);border-radius:12px;box-shadow:none}
+}
+@media(max-width:700px){
+ #mobileTabs{position:fixed;left:0;right:0;bottom:0;width:auto;max-width:none;margin:0;border-radius:0;padding:5px max(12px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+ main{padding-bottom:calc(220px + env(safe-area-inset-bottom))!important}
+ html{scroll-padding-bottom:calc(200px + env(safe-area-inset-bottom))}
+ .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .actions button{width:100%;min-height:44px;padding:8px 6px;font-size:12px}
+ .actions button:only-child{grid-column:1/-1}
+}
 </style>
 </head>
 <body>
-<header><div><h1>VERTEX HAMMAMI</h1><small>Area riservata · Gestione appuntamenti</small></div><button id="logout" class="secondary" hidden>Esci</button></header>
+<header><div class="brand-head"><img src="logo.jpg" alt="Logo VERTEX HAMMAMI"><div><h1>VERTEX HAMMAMI</h1><small>Area riservata · Gestione appuntamenti</small></div></div><button id="logout" class="secondary" hidden>Esci</button></header>
 <main>
 <section id="login" class="panel"><h2>Accesso amministratore</h2><p class="muted">Accedi con il tuo account autorizzato.</p><form id="loginForm"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required><p><button id="loginBtn" type="submit">ACCEDI</button></p></form></section>
 <section id="dashboard" hidden>
