@@ -68,6 +68,25 @@ button{min-height:46px;}
 }
 @media(max-width:380px){.toolbar-controls{grid-template-columns:1fr}.toolbar-controls select{grid-column:1}}
 
+
+/* VERTEX split-view: Agenda calendar + compact client directory */
+#mobileTabs{position:fixed;z-index:50;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr;background:#18130e;border-top:1px solid var(--line);padding:8px max(12px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:8px}
+#mobileTabs button{border:1px solid var(--line);background:#211b14;color:var(--muted);font-size:15px;min-height:52px}
+#mobileTabs button.active{background:linear-gradient(120deg,#ffe4a9,#bd8f4c);color:#20180e}
+#calendarPanel{padding:14px}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.calendar-head button{padding:9px 12px;min-height:42px}
+#calendarTitle{text-align:center;color:var(--gold2);font-weight:800;font-size:18px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.calendar-weekday{text-align:center;color:var(--muted);font-size:11px;font-weight:700;padding:5px 0}
+.calendar-day{position:relative;padding:5px 2px;background:#17130f;color:var(--text);border:1px solid #493a27;border-radius:7px;min-height:52px;font-size:14px}
+.calendar-day.outside{opacity:.4}.calendar-day.selected{outline:2px solid var(--gold);background:#302515}.calendar-day.today{color:var(--gold2)}
+.calendar-count{display:block;font-size:10px;color:var(--green);font-weight:700;line-height:1.2}
+#selectedDayTitle{margin:16px 2px 8px;font-size:17px;color:var(--gold2)}
+#clientSearch{margin:0 0 12px}
+.client-list{display:grid;gap:8px}.client-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid #493a27;background:#1b1712;border-radius:9px;min-width:0}
+.client-main{min-width:0}.client-main strong{display:block;color:var(--gold2);font-size:15px;overflow-wrap:anywhere}.client-main span{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}.client-card a{flex:0 0 auto;color:var(--gold2);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:8px 11px}
+@media(max-width:700px){main{padding-bottom:92px}.calendar-day{min-height:49px}.calendar-weekday{font-size:10px}.client-card{padding:9px 10px}}
 </style>
 </head>
 <body>
@@ -76,18 +95,15 @@ button{min-height:46px;}
 <section id="login" class="panel"><h2>Accesso amministratore</h2><p class="muted">Accedi con il tuo account autorizzato.</p><form id="loginForm"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required><p><button id="loginBtn" type="submit">ACCEDI</button></p></form></section>
 <section id="dashboard" hidden>
 
-<section class="panel" id="barbersPanel">
-  <h2>Gestione barbieri</h2>
-  <p class="muted">Quando un collaboratore inizia, premi “Attiva / nuovo nome” e inserisci il suo nome. Quando termina, premi “Disattiva”; il prossimo collaboratore potrà usare lo stesso posto con un nuovo nome.</p>
-  <form id="addBarberForm" class="toolbar" style="margin:12px 0">
-    <label for="newBarberName" class="sr-only">Nome del barbiere</label>
-    <input id="newBarberName" name="name" type="text" maxlength="80" placeholder="Nome del barbiere" required style="max-width:420px">
-    <button id="addBarberButton" type="submit">＋ Aggiungi nome</button>
-  </form>
-  <div id="barbersList">Caricamento barbieri...</div>
-</section>
+
 
  
+ <div id="agendaPage">
+ <section class="panel" id="calendarPanel" aria-label="Agenda calendario">
+  <div class="calendar-head"><button type="button" class="secondary" id="monthPrev" aria-label="Mese precedente">‹</button><div id="calendarTitle"></div><button type="button" class="secondary" id="monthNext" aria-label="Mese successivo">›</button></div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+  <h3 id="selectedDayTitle">Appuntamenti del giorno</h3>
+ </section>
  <div class="panel toolbar"><div><h2>Prenotazioni</h2><small>Le richieste vengono confermate solo dal titolare.</small></div><div class="toolbar-controls"><select id="filter" aria-label="Filtra prenotazioni"><option value="all">Tutte</option><option value="pending">In attesa</option><option value="confirmed">Confermate</option><option value="rejected">Rifiutate</option><option value="cancelled">Annullate</option><option value="blocked">Orari bloccati</option></select><button id="toggleSchedule" class="secondary" type="button" aria-expanded="false" aria-controls="schedulePanel">🕒 Gestione orari</button><button id="refresh" class="secondary" type="button">↻ Aggiorna</button></div></div>
  <section id="schedulePanel" class="panel" hidden aria-label="Gestione orari">
   <h3>Blocca un orario</h3>
@@ -107,6 +123,21 @@ button{min-height:46px;}
  <div id="dashboardMessage" class="notice" role="status" aria-live="polite">Premi Aggiorna per ricaricare le prenotazioni.</div>
  <div id="cards" class="cards"></div>
  <p class="footnote" id="lastRefresh">Nessun aggiornamento effettuato.</p>
+ </div><!-- end agendaPage -->
+ <section id="clientsPage" hidden>
+  <section class="panel" id="barbersPanel">
+  <h2>Gestione barbieri</h2>
+  <p class="muted">Quando un collaboratore inizia, premi “Attiva / nuovo nome” e inserisci il suo nome. Quando termina, premi “Disattiva”; il prossimo collaboratore potrà usare lo stesso posto con un nuovo nome.</p>
+  <form id="addBarberForm" class="toolbar" style="margin:12px 0">
+    <label for="newBarberName" class="sr-only">Nome del barbiere</label>
+    <input id="newBarberName" name="name" type="text" maxlength="80" placeholder="Nome del barbiere" required style="max-width:420px">
+    <button id="addBarberButton" type="submit">＋ Aggiungi nome</button>
+  </form>
+  <div id="barbersList">Caricamento barbieri...</div>
+</section>
+  <div class="panel"><div class="toolbar"><div><h2>Clienti</h2><small>Rubrica aggiornata dalle prenotazioni.</small></div><strong id="clientCount" class="muted"></strong></div><input id="clientSearch" type="search" placeholder="Cerca nome o telefono" aria-label="Cerca clienti"><div id="clientList" class="client-list"></div></div>
+ </section>
+ <nav id="mobileTabs" aria-label="Navigazione"><button type="button" id="tabAgenda" class="active">🗓️ Agenda</button><button type="button" id="tabClients">👥 Clienti</button></nav>
 </section>
 <div id="loginMessage" class="notice" role="status" aria-live="polite" hidden></div>
 </main>
@@ -126,6 +157,12 @@ button{min-height:46px;}
   <div class="form-actions"><button type="submit">💾 Salva modifica</button><button type="button" class="secondary" id="cancelEdit">Annulla</button></div>
  </form>
 </dialog>
+<dialog id="bookingDetails" class="dialog-shell" aria-labelledby="bookingDetailsTitle">
+ <h2 id="bookingDetailsTitle">Dettagli appuntamento</h2>
+ <div id="bookingDetailsBody"></div>
+ <div id="bookingDetailsActions" class="form-actions"></div>
+ <button type="button" class="secondary" id="closeBookingDetails">Chiudi</button>
+</dialog>
 <script>
 'use strict';
 // Impostazioni riprese ESATTAMENTE dal file admin.html fornito dall'utente.
@@ -134,6 +171,9 @@ const SUPABASE_URL='https://xdyrujptrggyhltljmlm.supabase.co';
 const SUPABASE_KEY='sb_publishable_PJLP34HkqWKZbwhsN65KKA_12wdK7V8';
 const $=id=>document.getElementById(id);
 let accessToken='',bookings=[],loading=false;
+let agendaMonth=new Date();
+let selectedAgendaDay=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
+let activeAdminTab='agenda';
 // Sessione Supabase: persiste nell'app installata; NON memorizzare mai la password.
 const VERTEX_SESSION_KEY='vertex_hammami_admin_session_v1';
 let vertexSession=null,vertexRefreshPromise=null;
@@ -356,7 +396,49 @@ async function api(path,body,token=''){
 function dateRome(value){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.getTime())?'Data non valida':d.toLocaleString('it-IT',{timeZone:'Europe/Rome',dateStyle:'full',timeStyle:'short'})}
 function appointmentRange(start,end){if(!start)return '—';const a=new Date(start);if(Number.isNaN(a.getTime()))return 'Data non valida';const day=a.toLocaleDateString('it-IT',{timeZone:'Europe/Rome',weekday:'long',day:'numeric',month:'long',year:'numeric'});const timeOptions={timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hour12:false};const from=a.toLocaleTimeString('it-IT',timeOptions);if(!end)return day+' • '+from;const b=new Date(end);if(Number.isNaN(b.getTime()))return day+' • '+from;return day+' • '+from+'–'+b.toLocaleTimeString('it-IT',timeOptions)}
 function line(card,label,value){const p=document.createElement('p');const strong=document.createElement('b');strong.textContent=label+': ';p.append(strong,document.createTextNode(String(value??'—')));card.append(p)}
+function openBookingDetails(b){
+ const body=$('bookingDetailsBody');body.replaceChildren();
+ const blocked=b.status==='blocked'||b.customer_name==='BLOCCATO';
+ const pairs=[['Cliente',blocked?'Blocco orario':b.customer_name],['Data e ora',appointmentRange(b.starts_at,b.ends_at)],['Servizio',b.service_name],['Telefono',b.customer_phone],['Prezzo',b.price!=null?b.price+' €':'—'],['Stato',statusLabels[b.status]||b.status]];
+ for(const [label,value] of pairs){const p=document.createElement('p');const strong=document.createElement('b');strong.textContent=label+': ';p.append(strong,document.createTextNode(String(value||'—')));body.append(p)}
+ const actions=$('bookingDetailsActions');actions.replaceChildren();
+ if(!blocked&&b.customer_phone){const call=document.createElement('a');call.href='tel:'+String(b.customer_phone).replace(/[^+\d]/g,'');call.className='secondary';call.textContent='📞 Chiama';call.style.cssText='display:block;text-align:center;padding:12px;border:1px solid var(--line);border-radius:8px;color:var(--gold2);text-decoration:none;flex:1';actions.append(call)}
+ if(b.status==='pending'||b.status==='confirmed'){const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='✎ Modifica';edit.onclick=()=>{$('bookingDetails').close();openEdit(b)};actions.append(edit)}
+ if(b.status==='pending'){for(const [status,label,cls] of [['confirmed','Conferma',''],['rejected','Rifiuta','danger'],['cancelled','Annulla','secondary']]){const btn=document.createElement('button');btn.type='button';btn.className=cls;btn.textContent=label;btn.onclick=()=>{$('bookingDetails').close();changeStatus(b,status)};actions.append(btn)}}
+ if(b.status==='confirmed'){const btn=document.createElement('button');btn.type='button';btn.className='secondary';btn.textContent='Annulla';btn.onclick=()=>{$('bookingDetails').close();changeStatus(b,'cancelled')};actions.append(btn)}
+ if(b.status==='blocked'){const btn=document.createElement('button');btn.type='button';btn.className='secondary';btn.textContent='🔓 Sblocca';btn.onclick=()=>{$('bookingDetails').close();unblockTime(b)};actions.append(btn)}
+ $('bookingDetails').showModal();
+}
+function setAdminTab(tab){
+ activeAdminTab=tab;
+ $('agendaPage').hidden=tab!=='agenda';$('clientsPage').hidden=tab!=='clients';
+ $('tabAgenda').classList.toggle('active',tab==='agenda');$('tabClients').classList.toggle('active',tab==='clients');
+ render();window.scrollTo({top:0,behavior:'smooth'});
+}
+function bookingDayKey(b){return new Date(b.starts_at).toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'})}
+function renderCalendar(){
+ const grid=$('calendarGrid');if(!grid)return;grid.replaceChildren();
+ const monthName=agendaMonth.toLocaleDateString('it-IT',{month:'long',year:'numeric'});$('calendarTitle').textContent=monthName.charAt(0).toUpperCase()+monthName.slice(1);
+ for(const d of ['Lun','Mar','Mer','Gio','Ven','Sab','Dom']){const e=document.createElement('div');e.className='calendar-weekday';e.textContent=d;grid.append(e)}
+ const y=agendaMonth.getFullYear(),m=agendaMonth.getMonth();const first=new Date(Date.UTC(y,m,1));const offset=(first.getUTCDay()+6)%7;const start=new Date(Date.UTC(y,m,1-offset));
+ const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
+ const live=bookings.filter(b=>!['cancelled','rejected','unblocked'].includes(String(b.status||'').toLowerCase()));
+ for(let i=0;i<42;i++){const dt=new Date(start);dt.setUTCDate(start.getUTCDate()+i);const key=dt.toISOString().slice(0,10);const items=live.filter(b=>bookingDayKey(b)===key);const btn=document.createElement('button');btn.type='button';btn.className='calendar-day'+(dt.getUTCMonth()!==m?' outside':'')+(key===selectedAgendaDay?' selected':'')+(key===today?' today':'');btn.innerHTML='<span>'+dt.getUTCDate()+'</span>'+(items.length?'<span class="calendar-count">'+items.length+' •</span>':'');btn.setAttribute('aria-label',key+(items.length?', '+items.length+' appuntamenti':''));btn.onclick=()=>{selectedAgendaDay=key;render()};grid.append(btn)}
+ const selected=new Date(selectedAgendaDay+'T12:00:00Z');$('selectedDayTitle').textContent='Appuntamenti · '+selected.toLocaleDateString('it-IT',{timeZone:'Europe/Rome',weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $('monthPrev').onclick=()=>{agendaMonth=new Date(y,m-1,1);renderCalendar()};$('monthNext').onclick=()=>{agendaMonth=new Date(y,m+1,1);renderCalendar()};
+}
+function renderClients(){
+ const host=$('clientList');if(!host)return;host.replaceChildren();
+ const q=String($('clientSearch')?.value||'').trim().toLocaleLowerCase('it');
+ const grouped=new Map();
+ for(const b of bookings){if(['cancelled','rejected','blocked','unblocked'].includes(String(b.status||'').toLowerCase()))continue;const name=String(b.customer_name||'Cliente').trim();const phone=String(b.customer_phone||'').trim();const key=(phone||name).toLowerCase();if(!grouped.has(key))grouped.set(key,{name,phone,count:0,latest:b});const c=grouped.get(key);c.count++;if(new Date(b.starts_at)>new Date(c.latest.starts_at))c.latest=b}
+ const clients=[...grouped.values()].filter(c=>(c.name+' '+c.phone).toLocaleLowerCase('it').includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'it'));
+ $('clientCount').textContent=clients.length+' clienti';
+ if(!clients.length){const e=document.createElement('div');e.className='empty';e.textContent='Nessun cliente trovato.';host.append(e);return}
+ for(const c of clients){const card=document.createElement('article');card.className='client-card';const main=document.createElement('div');main.className='client-main';const name=document.createElement('strong');name.textContent=c.name;const details=document.createElement('span');details.textContent=(c.phone||'Telefono non disponibile')+' · '+c.count+' prenotazioni';const latest=document.createElement('span');latest.textContent=(c.latest.service_name||'Servizio')+' · '+dateRome(c.latest.starts_at);main.append(name,details,latest);card.append(main);if(c.phone){const tel=document.createElement('a');tel.href='tel:'+c.phone.replace(/[^+\d]/g,'');tel.textContent='Chiama';card.append(tel)}host.append(card)}
+}
 function render(){
+ renderCalendar();renderClients();
  const cards=$('cards');cards.replaceChildren();
  const f = $('filter').value;
 
@@ -375,7 +457,7 @@ const visible = bookings.filter(b => {
     timeZone: 'Europe/Rome'
   });
 
-  if (bookingDay < today) return false;
+  if (bookingDay !== selectedAgendaDay) return false;
 
   return f === 'all' || status === f;
 });
@@ -388,7 +470,7 @@ const visible = bookings.filter(b => {
  visible.sort((a,b)=>Number(a.status==='blocked')-Number(b.status==='blocked'));
  for(const b of visible){
   const isBlock=b.status==='blocked'||b.customer_name==='BLOCCATO'||b.customer_phone==='ADMIN';
-  const card=document.createElement('article');card.className='booking'+(isBlock&&b.status==='blocked'?' booking--blocked':'');
+  const card=document.createElement('article');card.className='booking'+(isBlock&&b.status==='blocked'?' booking--blocked':'');card.style.cursor='pointer';card.title='Apri dettagli';card.onclick=()=>openBookingDetails(b);
   const head=document.createElement('div');head.className='booking-head';
   const name=document.createElement('strong');name.className='customer-name';name.textContent=isBlock?(b.status==='blocked'?'🔒 Blocco orario':'🔓 Blocco sbloccato'):(b.customer_name||'Cliente');head.append(name);
   const appointmentDate=document.createElement('span');appointmentDate.className='appointment-date';appointmentDate.textContent=appointmentRange(b.starts_at,b.ends_at);head.append(appointmentDate);card.append(head);
@@ -396,8 +478,8 @@ const visible = bookings.filter(b => {
   if(!isBlock)line(card,'Prezzo',b.price!=null?b.price+' €':'—');
   if(!isBlock)line(card,'Telefono',b.customer_phone||'—');
   const st=document.createElement('p');st.className='status '+(isBlock&&b.status==='cancelled'?'confirmed':(b.status||''));st.textContent='Stato: '+(isBlock&&b.status==='cancelled'?'Sbloccato':(statusLabels[b.status]||b.status||'—'));card.append(st);
-  if(!isBlock&&b.customer_phone){const phone=String(b.customer_phone).replace(/[^+\d]/g,'');if(phone){const a=document.createElement('a');a.href='tel:'+phone;a.textContent='Chiama il cliente';card.append(a)}}
-  const actions=document.createElement('div');actions.className='actions';
+  if(!isBlock&&b.customer_phone){const phone=String(b.customer_phone).replace(/[^+\d]/g,'');if(phone){const a=document.createElement('a');a.href='tel:'+phone;a.textContent='Chiama il cliente';a.onclick=e=>e.stopPropagation();card.append(a)}}
+  const actions=document.createElement('div');actions.className='actions';actions.onclick=e=>e.stopPropagation();
   if(b.status==='pending'||b.status==='confirmed'){
    const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='✎ Modifica';edit.disabled=loading;edit.onclick=()=>openEdit(b);actions.append(edit);
   }
@@ -610,6 +692,7 @@ $('editForm').addEventListener('submit',async e=>{
  }catch(err){showNotice(err.message,'error')}
 });
 $('cancelEdit').onclick=()=>$('editDialog').close();
+$('closeBookingDetails').onclick=()=>$('bookingDetails').close();
 
 $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();const btn=$('loginBtn');btn.disabled=true;showNotice('Accesso in corso…');
@@ -628,6 +711,7 @@ $('logout').onclick=async()=>{
  }
 };
 $('refresh').onclick=()=>load();$('filter').onchange=render;
+$('tabAgenda').onclick=()=>setAdminTab('agenda');$('tabClients').onclick=()=>setAdminTab('clients');$('clientSearch').addEventListener('input',renderClients);
 // Riaprendo l'app dalla Home o da un link, rinnova la sessione quando serve.
 window.addEventListener('pageshow',()=>{if(!accessToken)vertexRestoreSession();});
 document.addEventListener('visibilitychange',()=>{
