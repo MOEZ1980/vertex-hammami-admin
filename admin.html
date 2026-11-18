@@ -495,7 +495,13 @@ function renderCalendar(){
  const y=agendaMonth.getFullYear(),m=agendaMonth.getMonth();const first=new Date(Date.UTC(y,m,1));const offset=(first.getUTCDay()+6)%7;const start=new Date(Date.UTC(y,m,1-offset));
  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
  const live=bookings.filter(b=>!['cancelled','rejected','unblocked'].includes(String(b.status||'').toLowerCase()));
- for(let i=0;i<42;i++){const dt=new Date(start);dt.setUTCDate(start.getUTCDate()+i);const key=dt.toISOString().slice(0,10);const items=live.filter(b=>bookingDayKey(b)===key);const btn=document.createElement('button');btn.type='button';btn.className='calendar-day'+(dt.getUTCMonth()!==m?' outside':'')+(key===selectedAgendaDay?' selected':'')+(key===today?' today':'');btn.innerHTML='<span>'+dt.getUTCDate()+'</span>'+(items.length?'<span class="calendar-count">'+items.length+' •</span>':'');btn.setAttribute('aria-label',key+(items.length?', '+items.length+' appuntamenti':''));btn.onclick=()=>{selectedAgendaDay=key;render()};grid.append(btn)}
+ for(let i=0;i<42;i++){const dt=new Date(start);dt.setUTCDate(start.getUTCDate()+i);const key=dt.toISOString().slice(0,10);const items=live.filter(b=>bookingDayKey(b)===key);const btn=document.createElement('button');btn.type='button';btn.className='calendar-day'+(dt.getUTCMonth()!==m?' outside':'')+(key===selectedAgendaDay?' selected':'')+(key===today?' today':'');btn.innerHTML='<span>'+dt.getUTCDate()+'</span>'+(items.length?'<span class="calendar-count">'+items.length+' •</span>':'');btn.setAttribute('aria-label',key+(items.length?', '+items.length+' appuntamenti':''));for(const b of items){
+ for(const b of items){
+  const entry=document.createElement('span');
+  entry.style.cssText='display:block;font-size:10px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  entry.textContent=timeRome(b.starts_at)+' '+(b.customer_name||'Cliente');
+  btn.append(entry);
+}btn.onclick=()=>{selectedAgendaDay=key;render()};grid.append(btn)}
  const selected=new Date(selectedAgendaDay+'T12:00:00Z');$('selectedDayTitle').textContent='Appuntamenti · '+selected.toLocaleDateString('it-IT',{timeZone:'Europe/Rome',weekday:'long',day:'numeric',month:'long',year:'numeric'});
  $('monthPrev').onclick=()=>{agendaMonth=new Date(y,m-1,1);renderCalendar()};$('monthNext').onclick=()=>{agendaMonth=new Date(y,m+1,1);renderCalendar()};
 }
